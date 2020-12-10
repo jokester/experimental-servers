@@ -33,6 +33,7 @@ jobs:
         uses: lokkju/github-action-sbt@versions/11-1.3.0-2.13.0
         with:
           commands: packageXzTarball
+          sbt_project_directory: scala-akka-tapir/
 
       - name: login to ghcr
         uses: docker/login-action@v1
