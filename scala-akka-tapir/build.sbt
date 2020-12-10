@@ -13,3 +13,6 @@ lazy val root = (project in file("."))
     libraryDependencies ++= runtimeDeps ++ testDeps ++ buildDeps,
     scalacOptions ++= Seq("-Xlint")
   )
+  .enablePlugins(
+    JavaAppPackaging,
+  )
