@@ -1,0 +1,10 @@
+{
+  "name": "nodejs-serve",
+  "version": "0.1.0-",
+  "description": "a docker image running serve@npm",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^11.3.2"
+  }
+}
