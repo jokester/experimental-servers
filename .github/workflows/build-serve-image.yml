@@ -1,7 +1,6 @@
 name: Build docker image for nodejs-serve
 
 on:
-  push:
   pull_request:
     paths:
       - nodejs-serve/**
