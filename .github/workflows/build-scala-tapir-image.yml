@@ -1,7 +1,6 @@
 name: Build docker image for scala-tapir
 
 on:
-  push:
   pull_request:
     paths:
       - scala-akka-tapir/**
