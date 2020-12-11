@@ -1,9 +1,11 @@
 package io.jokester.tapir_todoapi
 
+import com.typesafe.scalalogging.LazyLogging
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.StdIn
 
-object AkkaHttpServer {
+object AkkaHttpServer extends LazyLogging {
 
   private val routes = {
     import akka.http.scaladsl.server.Directives._
@@ -53,12 +55,11 @@ object AkkaHttpServer {
         }
       )
 
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
+    logger.debug(s"Server online at http://localhost:8080/")
+    logger.debug(s"Press ENTER to stop")
     StdIn.readLine() // let it run until user presses return
     bindingFuture
       .flatMap(_.unbind())                        // trigger unbinding from the port
       .onComplete(_ => untypedSystem.terminate()) // and shutdown when done
-
   }
-
 }
