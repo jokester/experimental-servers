@@ -1,11 +1,7 @@
-FROM amazoncorretto
-MAINTAINER Guan Wang <momocraft@gmail.com>
+FROM alpine:3.12
+COPY ./ /usr/src/
+RUN mkdir -pv /srv && tar xvf /usr/src/tapir-todoapi-current.txz -C /srv/
 
-COPY ./ /srv/app
-
-RUN cd /srv/app \
-    && yarn
-
-ENTRYPOINT /srv/app/bin/
-CMD /
-
+FROM amazoncorretto:11
+COPY --from=0 /srv /srv
+ENTRYPOINT ["/srv/tapir-todoapi-current/bin/tapir-todoapi"]
