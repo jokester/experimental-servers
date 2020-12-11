@@ -1,5 +1,6 @@
 package io.jokester.tapir_todoapi
 
+import akka.http.scaladsl.server.Route
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,8 +21,25 @@ object AkkaHttpServer extends LazyLogging {
       ),
       TodoApi.endpoints.updateTodo.toRoute(req =>
         Future.successful(ServerLogic.update(req._1, req._2))
-      )
+      ),
+      openapiRoute
     ).reduce(_ ~ _)
+  }
+
+  def openapiRoute: Route = {
+    import akka.http.scaladsl.server.Directives._
+    import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+    import akka.http.scaladsl.model.ContentTypes._
+    import akka.http.scaladsl.model.headers.`Content-Type`
+
+
+    (get & path("openapi.yaml")) {
+
+      complete(200,
+        Seq(`Content-Type`(ContentTypes.`text/plain(UTF-8)`)),
+        TodoApi.asOpenAPIYaml)
+    }
+
   }
 
   def main(): Unit = {
