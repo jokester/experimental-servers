@@ -55,7 +55,7 @@ object AkkaHttpServer extends LazyLogging {
 
     val bindingFuture = Http()(new ClassicActorSystemProvider {
       override def classicSystem: ActorSystem = untypedSystem
-    }).newServerAt("localhost", 8080)
+    }).newServerAt("0.0.0.0", 8080)
       .bind(
         cors(
           CorsSettings.default.withAllowedMethods(
