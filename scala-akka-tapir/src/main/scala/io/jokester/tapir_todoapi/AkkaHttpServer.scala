@@ -48,6 +48,7 @@ object AkkaHttpServer extends LazyLogging {
     import akka.http.scaladsl.model.HttpMethods
     import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
     import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+    import scala.concurrent.duration._
 
     implicit val untypedSystem = ActorSystem("ClassicToTypedSystem")
 
@@ -72,7 +73,8 @@ object AkkaHttpServer extends LazyLogging {
           routes
         }
       )
-      .andThen(server => {
+      .map(_.addToCoordinatedShutdown(10.seconds))
+      .map(server => {
         logger.debug(s"Server online at http://localhost:8080/")
         server
       })
