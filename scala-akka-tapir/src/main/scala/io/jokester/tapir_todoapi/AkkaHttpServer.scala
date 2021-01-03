@@ -93,5 +93,8 @@ object AkkaHttpServer extends LazyLogging {
           // let it run until user presses return
           console.readLine()
         })
-      .getOrElse(Future.never)
+      .getOrElse({
+        logger.debug(s"No TTY found. Ignoring console.")
+        Future.never
+      })
 }
