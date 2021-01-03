@@ -4,7 +4,6 @@ import akka.http.scaladsl.server.Route
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.io.StdIn
 
 object AkkaHttpServer extends LazyLogging {
 
@@ -49,24 +48,30 @@ object AkkaHttpServer extends LazyLogging {
 
     implicit val executionContext = ExecutionContext.global
 
+    val loggingEnabledRoutes: Route = ctx => {
+      logger.debug(s"Request: ${ctx.request.method.name} ${ctx.request.uri}")
+      routes(ctx)
+    }
+
+    val corsEnabledRoutes = cors(
+      CorsSettings.default.withAllowedMethods(
+        Seq(
+          HttpMethods.GET,
+          HttpMethods.OPTIONS,
+          HttpMethods.POST,
+          HttpMethods.DELETE,
+          HttpMethods.PUT,
+          HttpMethods.PATCH
+        )
+      )
+    ) {
+      loggingEnabledRoutes
+    }
     val bindingFuture = Http()(new ClassicActorSystemProvider {
       override def classicSystem: ActorSystem = untypedSystem
     }).newServerAt("0.0.0.0", 8080)
       .bind(
-        cors(
-          CorsSettings.default.withAllowedMethods(
-            Seq(
-              HttpMethods.GET,
-              HttpMethods.OPTIONS,
-              HttpMethods.POST,
-              HttpMethods.DELETE,
-              HttpMethods.PUT,
-              HttpMethods.PATCH
-            )
-          )
-        ) {
-          routes
-        }
+        corsEnabledRoutes
       )
       .map(_.addToCoordinatedShutdown(10.seconds))
       .map(server => {

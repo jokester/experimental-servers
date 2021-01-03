@@ -4,7 +4,8 @@ object Dependencies {
   lazy val runtimeDeps: Seq[ModuleID] = Seq(
     // logging
     "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.2",
-    "ch.qos.logback"              % "logback-classic" % "1.2.3" // this provides SLJ4J backend
+    "ch.qos.logback"              % "logback-classic" % "1.2.3", // this provides SLJ4J backend
+    "com.typesafe.akka" %% "akka-slf4j" % Versions.akkaStreams
     //      "com.softwaremill.sttp.client3" %% "core"            % Versions.sttp
   ) ++ Seq(
     "io.circe" %% "circe-core",
