@@ -79,8 +79,9 @@ object AkkaHttpServer extends LazyLogging {
         server
       })
 
-    for (bound <- bindingFuture;
-         stop  <- waitKeyboardInterrupt()) {
+    for (bound  <- bindingFuture;
+         stop   <- waitKeyboardInterrupt();
+         unbound <- bound.unbind()) {
       untypedSystem.terminate()
     }
   }
