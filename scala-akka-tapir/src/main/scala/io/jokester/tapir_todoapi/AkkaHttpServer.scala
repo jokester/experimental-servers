@@ -17,11 +17,9 @@ object AkkaHttpServer extends LazyLogging {
       TodoApi.endpoints.listTodo.toRoute(_ => Future.successful(ServerLogic.list())),
       TodoApi.endpoints.createTodo.toRoute(req => Future.successful(ServerLogic.create(req))),
       TodoApi.endpoints.deleteTodo.toRoute(req =>
-        Future.successful(ServerLogic.remove(req).map(_ => ()))
-      ),
+        Future.successful(ServerLogic.remove(req).map(_ => ()))),
       TodoApi.endpoints.updateTodo.toRoute(req =>
-        Future.successful(ServerLogic.update(req._1, req._2))
-      ),
+        Future.successful(ServerLogic.update(req._1, req._2))),
       openapiRoute
     ).reduce(_ ~ _)
   }
@@ -32,12 +30,9 @@ object AkkaHttpServer extends LazyLogging {
     import akka.http.scaladsl.model.ContentTypes._
     import akka.http.scaladsl.model.headers.`Content-Type`
 
-
     (get & path("openapi.yaml")) {
 
-      complete(200,
-        Seq(`Content-Type`(ContentTypes.`text/plain(UTF-8)`)),
-        TodoApi.asOpenAPIYaml)
+      complete(200, Seq(`Content-Type`(ContentTypes.`text/plain(UTF-8)`)), TodoApi.asOpenAPIYaml)
     }
 
   }
@@ -48,6 +43,7 @@ object AkkaHttpServer extends LazyLogging {
     import akka.http.scaladsl.model.HttpMethods
     import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
     import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+    import scala.concurrent.duration._
 
     implicit val untypedSystem = ActorSystem("ClassicToTypedSystem")
 
@@ -72,12 +68,29 @@ object AkkaHttpServer extends LazyLogging {
           routes
         }
       )
+      .map(_.addToCoordinatedShutdown(10.seconds))
+      .map(server => {
+        logger.debug(s"Server online at http://localhost:8080/")
+        server
+      })
 
-    logger.debug(s"Server online at http://localhost:8080/")
-    logger.debug(s"Press ENTER to stop")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind())                        // trigger unbinding from the port
-      .onComplete(_ => untypedSystem.terminate()) // and shutdown when done
+    for (bound  <- bindingFuture;
+         stop   <- waitKeyboardInterrupt();
+         unbound <- bound.unbind()) {
+      untypedSystem.terminate()
+    }
   }
+
+  def waitKeyboardInterrupt()(implicit executionContext: ExecutionContext): Future[Unit] =
+    Option(System.console())
+      .map(console =>
+        Future[Unit] {
+          logger.debug(s"Press ENTER to stop")
+          // let it run until user presses return
+          console.readLine()
+      })
+      .getOrElse({
+        logger.debug(s"No TTY found. Ignoring console.")
+        Future.never
+      })
 }
