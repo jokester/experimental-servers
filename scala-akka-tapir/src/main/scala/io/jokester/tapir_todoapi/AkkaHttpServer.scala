@@ -72,12 +72,24 @@ object AkkaHttpServer extends LazyLogging {
           routes
         }
       )
+      .andThen(server => {
+        logger.debug(s"Server online at http://localhost:8080/")
+        server
+      })
 
-    logger.debug(s"Server online at http://localhost:8080/")
-    logger.debug(s"Press ENTER to stop")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind())                        // trigger unbinding from the port
-      .onComplete(_ => untypedSystem.terminate()) // and shutdown when done
+    for (bound <- bindingFuture;
+         stop  <- waitKeyboardInterrupt()) {
+      untypedSystem.terminate()
+    }
   }
+
+  def waitKeyboardInterrupt()(implicit executionContext: ExecutionContext): Future[Unit] =
+    Option(System.console())
+      .map(console =>
+        Future[Unit] {
+          logger.debug(s"Press ENTER to stop")
+          // let it run until user presses return
+          console.readLine()
+        })
+      .getOrElse(Future.never)
 }
