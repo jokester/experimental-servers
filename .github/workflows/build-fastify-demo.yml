@@ -1,4 +1,4 @@
-name: Build docker image for nodejs-serve
+name: Build docker image for node-fastify-demo
 
 on:
   push:
