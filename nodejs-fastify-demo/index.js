@@ -7,13 +7,13 @@ fastify.get('/', async (request, reply) => {
 })
 
 fastify.get('/probe', async (request, reply) => {
-  return ({ uptime: process.uptime(), hostname: os.hostname(), loadavg: os.loadavg() });
+  return ({ uptime: process.uptime(), hostname: os.hostname(), loadavg: os.loadavg() })
 })
 
 // Run the server!
 const start = async () => {
   try {
-    await fastify.listen(3000)
+    await fastify.listen(3006, '0.0.0.0')
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
